@@ -1,7 +1,7 @@
 const SubTask = require('../../models/SubtaskModel');
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
-const updateMainTaskStatus = require('../../services/task_status');
+const { updateMainTaskStatus } = require('../../services/task_status');
 
 function generateRandomTaskId() {
   return Math.floor(Math.random() * 100) + 1;
@@ -40,8 +40,18 @@ async function updateSubTask(req, res) {
           .status(400)
           .json({ error: 'Invalid status. Must be 1 or 0' });
       }
-      if (status === 1) updateMainTaskStatus(subtask.task_id);
+      if (status === 1) {
+        updateMainTaskStatus(subtask.task_id);
+        subtask.deleted_at = new Date();
+      }
       subtask.status = status;
+    }
+
+    const allSubtasksComplete =
+      (await SubTask.find({ id: taskId, status: 0 }).countDocuments()) === 0;
+
+    if (allSubtasksComplete) {
+      await Task.updateOne({ _id: subtask.task_id }, { status: 'DONE' });
     }
 
     // Save the updated task
@@ -96,6 +106,8 @@ async function deleteSubTasks(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
+
 module.exports = {
   createSubtask,
   updateSubTask,

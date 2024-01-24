@@ -5,9 +5,9 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema({
   user_id: Number,
   task_id: { type: Number, unique: true },
-  title: String,
-  description: String,
-  due_date: Date,
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  due_date: { type: Date, required: true },
   priority: {
     type: Number,
     validate: {

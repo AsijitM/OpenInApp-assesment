@@ -5,11 +5,12 @@ const {
   getAllsubTasks,
   deleteSubTasks,
 } = require('./subtask.controller');
+const taskExists = require('../../middlewares/taskExists');
 
 const subtaskRouter = express.Router();
 
-subtaskRouter.post('/create-sub-task', createSubtask);
-subtaskRouter.post('/update-sub-task/:taskId', updateSubTask);
+subtaskRouter.post('/:task_id/create-sub-task', taskExists,createSubtask);
+subtaskRouter.post('/:task_id/update-sub-task/:taskId',taskExists, updateSubTask);
 subtaskRouter.get('/subtasks', getAllsubTasks);
 subtaskRouter.delete('/subtasks/:subtaskid', deleteSubTasks);
 
