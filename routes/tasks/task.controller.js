@@ -1,5 +1,7 @@
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
+const { softDeleteTaskAndSubtasks } = require('../../services/task_status');
+const getPriority = require('../../services/setPriority');
 
 function generateRandomTaskId() {
   return Math.floor(Math.random() * 1000) + 1;
@@ -13,10 +15,14 @@ async function createTask(req, res) {
     const task_id = generateRandomTaskId();
 
     // Create a new task
+
+    const priority = getPriority(new Date(due_date));
+    console.log(priority);
     const newTask = new Task({
       user_id,
       task_id,
       title,
+      priority: priority,
       description,
       due_date,
     });
@@ -51,6 +57,7 @@ async function updateTask(req, res) {
           .status(400)
           .json({ error: 'Invalid status. Must be "TODO" or "DONE"' });
       }
+      if (status === 'DONE') softDeleteTaskAndSubtasks(taskId);
       task.status = status;
     }
 
@@ -121,6 +128,9 @@ async function deleteTask(req, res) {
 
     // Soft delete the task
     task.is_deleted = true;
+
+    // soft delete the subtasks
+    softDeleteTaskAndSubtasks(taskId);
 
     // Save the updated task
     await task.save();
