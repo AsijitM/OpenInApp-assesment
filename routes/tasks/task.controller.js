@@ -1,7 +1,8 @@
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
-const { softDeleteTaskAndSubtasks } = require('../../services/task_status');
-const getPriority = require('../../services/setPriority');
+const { softDeleteTaskAndSubtasks } = require('../../helper/task_status');
+const getPriority = require('../../helper/setPriority');
+const { validationResult } = require('express-validator');
 
 function generateRandomTaskId() {
   return Math.floor(Math.random() * 1000) + 1;
@@ -10,6 +11,10 @@ async function createTask(req, res) {
   const { title, description, due_date } = req.body;
   const user_id = req.user.id;
 
+  const errors = validationResult(req);
+  if (!errors.isEmpty())
+    return res.status(400).json({ errors: errors.array() });
+
   try {
     // Generate a unique random number for task_id
     const task_id = generateRandomTaskId();
@@ -17,7 +22,7 @@ async function createTask(req, res) {
     // Create a new task
 
     const priority = getPriority(new Date(due_date));
-    console.log(priority);
+
     const newTask = new Task({
       user_id,
       task_id,
@@ -71,7 +76,7 @@ async function updateTask(req, res) {
 }
 
 async function getAllTasks(req, res) {
-  const { priority, due_date } = req.query;
+  const { priority, due_date } = (req.query);
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
 
@@ -84,7 +89,7 @@ async function getAllTasks(req, res) {
 
     if (priority) {
       filter.priority = priority;
-      results.priority = priority;
+      results.priority = parseInt(priority);
     }
     if (due_date) {
       filter.due_date = due_date;

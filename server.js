@@ -1,14 +1,16 @@
 const express = require('express');
+require('dotenv').config();
+
 const { mongoConnect } = require('./services/mongo');
 const { UserRouter } = require('./routes/user/user.router');
 const { TaskRouter } = require('./routes/tasks/task.router');
 const { subtaskRouter } = require('./routes/tasks/subtask.router');
-
 const authenticate = require('./middlewares/authenticate');
 const runCron = require('./cronjobs/prioritySetter');
+const { scheduleVoiceCalls } = require('./cronjobs/voiceCall');
+
 const PORT = 3000;
 const app = express();
-require('dotenv').config();
 
 app.use(express.json());
 
@@ -22,6 +24,7 @@ app.use('/', UserRouter);
 
 // cron-job
 runCron();
+scheduleVoiceCalls();
 
 async function startServer() {
   await mongoConnect();
