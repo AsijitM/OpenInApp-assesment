@@ -1,6 +1,7 @@
 const SubTask = require('../../models/SubtaskModel');
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
+const updateMainTaskStatus = require('../../services/task_status');
 
 function generateRandomTaskId() {
   return Math.floor(Math.random() * 100) + 1;
@@ -14,7 +15,7 @@ async function createSubtask(req, res) {
 
     const id = generateRandomTaskId();
     const newSubTask = new SubTask({ id, task_id: task._id });
-    console.log(newSubTask);
+
     await newSubTask.save();
 
     res.status(201).json(newSubTask);
@@ -37,8 +38,9 @@ async function updateSubTask(req, res) {
       if (![0, 1].includes(status)) {
         return res
           .status(400)
-          .json({ error: 'Invalid status. Must be "1" or "0"' });
+          .json({ error: 'Invalid status. Must be 1 or 0' });
       }
+      if (status === 1) updateMainTaskStatus(subtask.task_id);
       subtask.status = status;
     }
 
