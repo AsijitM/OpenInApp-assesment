@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const { softDeleteTaskAndSubtasks } = require('../../helper/task_status');
 const getPriority = require('../../helper/setPriority');
 
-const { softDeleteTaskAndSubtasks } = require('../../services/task_status');
-const getPriority = require('../../services/setPriority');
+// const { softDeleteTaskAndSubtasks } = require('../../services/task_status');
+// const getPriority = require('../../services/setPriority');
 
 const { validationResult } = require('express-validator');
 
@@ -46,11 +46,12 @@ async function createTask(req, res) {
 
 async function updateTask(req, res) {
   const taskId = req.params.taskId;
+  const user_id = req.user.id;
   const { due_date, status } = req.body;
   console.log(taskId);
   try {
     // Find the Task by taskId
-    const task = await Task.findOne({ task_id: taskId });
+    const task = await Task.findOne({ task_id: taskId, user_id });
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
     }
@@ -69,6 +70,7 @@ async function updateTask(req, res) {
       }
       if (status === 'DONE') softDeleteTaskAndSubtasks(taskId);
       task.status = status;
+      
     }
 
     // Save the updated task
@@ -81,15 +83,16 @@ async function updateTask(req, res) {
 }
 
 async function getAllTasks(req, res) {
-  const { priority, due_date } = (req.query);
+  const { priority, due_date } = req.query;
   const page = parseInt(req.query.page);
   const limit = parseInt(req.query.limit);
+  const user_id = req.user.id;
 
   try {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const filter = { is_deleted: false };
+    const filter = { is_deleted: false, user_id };
     const results = {};
 
     if (priority) {

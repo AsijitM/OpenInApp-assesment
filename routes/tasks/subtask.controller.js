@@ -1,11 +1,9 @@
 const SubTask = require('../../models/SubtaskModel');
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
-<<<<<<< HEAD
+
 const { updateMainTaskStatus } = require('../../helper/task_status');
-=======
-const { updateMainTaskStatus } = require('../../services/task_status');
->>>>>>> 3422c09a56471a8c25d10f6ed3b284296e70397e
+
 
 function generateRandomTaskId() {
   return Math.floor(Math.random() * 100) + 1;
@@ -47,6 +45,7 @@ async function updateSubTask(req, res) {
       if (status === 1) {
         updateMainTaskStatus(subtask.task_id);
         subtask.deleted_at = new Date();
+        subtask.is_deleted = true;
       }
       subtask.status = status;
     }
@@ -110,7 +109,6 @@ async function deleteSubTasks(req, res) {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
-
 
 module.exports = {
   createSubtask,

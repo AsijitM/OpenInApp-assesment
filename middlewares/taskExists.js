@@ -1,10 +1,10 @@
-const Task = require("../models/TaskModel");
+const Task = require('../models/TaskModel');
 
 async function taskExists(req, res, next) {
   const { task_id } = req.params;
-  console.log(task_id);
+  const user_id = req.user.id;
   try {
-    const existingTask = await Task.findOne({ task_id });
+    const existingTask = await Task.findOne({ task_id, user_id });
 
     if (!existingTask) {
       return res.status(404).json({ message: 'Task not found' });
