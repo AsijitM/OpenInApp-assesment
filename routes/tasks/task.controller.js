@@ -1,7 +1,12 @@
 const Task = require('../../models/TaskModel');
 const mongoose = require('mongoose');
+
 const { softDeleteTaskAndSubtasks } = require('../../helper/task_status');
 const getPriority = require('../../helper/setPriority');
+
+const { softDeleteTaskAndSubtasks } = require('../../services/task_status');
+const getPriority = require('../../services/setPriority');
+
 const { validationResult } = require('express-validator');
 
 function generateRandomTaskId() {
